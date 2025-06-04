@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظم الوقت اليومي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+            -webkit-text-fill-color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .activity-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .activity-icon {
+            font-size: 1.5rem;
+        }
+
+        .activity-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-active {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .activity-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .daily-summary {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating-add-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .floating-add-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1001;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 منظم الوقت الذكي</h1>
+            <p>نظم يومك واحصل على أقصى استفادة من وقتك</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTasks">8</div>
+                <div>إجمالي المهام</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div>المهام المكتملة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayHours">0</div>
+                <div>ساعات اليوم</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="streak">1</div>
+                <div>أيام متتالية</div>
+            </div>
+        </div>
+
+        <div class="activities-grid" id="activitiesGrid">
+            <!-- Activities will be populated by JavaScript -->
+        </div>
+
+        <div class="daily-summary">
+            <div class="summary-title">📊 ملخص اليوم</div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="exportData()">📤 تصدير البيانات</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 استيراد البيانات</button>
+                <button class="btn btn-secondary" onclick="resetAllData()">🔄 إعادة تعيين الكل</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+            <div class="summary-stats">
+                <div class="summary-item">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">85%</div>
+                    <div>معدل الإنجاز</div>
+                </div>
+                <div class="summary-item">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">6.5</div>
+                    <div>ساعات نشطة</div>
+                </div>
+                <div class="summary-item">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #764ba2;">12</div>
+                    <div>نقاط التركيز</div>
+                </div>
+                <div class="summary-item">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;" id="lastSavedTime">--</div>
+                    <div>آخر حفظ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-add-btn" onclick="showAddTaskModal()">+</button>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">إضافة مهمة جديدة</h3>
+            <input type="text" id="newTaskName" placeholder="اسم المهمة" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <input type="number" id="newTaskDuration" placeholder="المدة (بالدقائق)" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <select id="newTaskIcon" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="📚">📚 دراسة</option>
+                <option value="🏃‍♂️">🏃‍♂️ رياضة</option>
+                <option value="🧘‍♂️">🧘‍♂️ تأمل</option>
+                <option value="💼">💼 عمل</option>
+                <option value="🎯">🎯 هدف</option>
+            </select>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="addNewTask()">إضافة</button>
+                <button class="btn btn-secondary" onclick="hideAddTaskModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Default activities data
+        const defaultActivities = [
+            {
+                id: 1,
+                name: 'الرياضة',
+                icon: '🏃‍♂️',
+                duration: 60,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 2,
+                name: 'تعلم الإنجليزية',
+                icon: '🇺🇸',
+                duration: 45,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 3,
+                name: 'تعلم الصينية',
+                icon: '🇨🇳',
+                duration: 30,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 4,
+                name: 'شرب الماء',
+                icon: '💧',
+                duration: 1440, // All day reminder
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 5,
+                name: 'الصلاة',
+                icon: '🕌',
+                duration: 30,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 6,
+                name: 'القراءة',
+                icon: '📖',
+                duration: 40,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 7,
+                name: 'التأمل',
+                icon: '🧘‍♂️',
+                duration: 20,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            },
+            {
+                id: 8,
+                name: 'العمل',
+                icon: '💼',
+                duration: 480,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            }
+        ];
+
+        let activities = [...defaultActivities];
+        let timers = {};
+        let appData = {
+            activities: [],
+            lastSaved: null,
+            totalStats: {
+                completedToday: 0,
+                hoursToday: 0,
+                streak: 1
+            }
+        };
+
+        function renderActivities() {
+            const grid = document.getElementById('activitiesGrid');
+            grid.innerHTML = '';
+
+            activities.forEach(activity => {
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                
+                const progress = activity.duration > 0 ? (activity.timeSpent / activity.duration) * 100 : 0;
+                const timeRemaining = Math.max(0, activity.duration - activity.timeSpent);
+                const isTimerActive = timers[activity.id];
+
+                card.innerHTML = `
+                    <div class="activity-header">
+                        <div class="activity-title">
+                            <span class="activity-icon">${activity.icon}</span>
+                            <span>${activity.name}</span>
+                        </div>
+                        <div class="activity-status status-${activity.status}">
+                            ${getStatusText(activity.status)}
+                        </div>
+                    </div>
+                    
+                    <div class="time-info">
+                        <span>الوقت المقضي: ${formatTime(activity.timeSpent)}</span>
+                        <span>المدة المطلوبة: ${formatTime(activity.duration)}</span>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
+                    </div>
+                    
+                    ${isTimerActive ? `
+                        <div class="timer-display" id="timer-${activity.id}">
+                            ${formatTime(timeRemaining)}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="activity-controls">
+                        ${!activity.completed ? `
+                            <button class="btn ${isTimerActive ? 'btn-secondary' : 'btn-primary'}" 
+                                    onclick="${isTimerActive ? 'pauseTimer' : 'startTimer'}(${activity.id})">
+                                ${isTimerActive ? '⏸️ إيقاف' : '▶️ ابدأ'}
+                            </button>
+                        ` : ''}
+                        
+                        ${!activity.completed ? `
+                            <button class="btn btn-success" onclick="completeActivity(${activity.id})">
+                                ✅ اكتمل
+                            </button>
+                        ` : `
+                            <button class="btn btn-success" disabled>
+                                ✅ مكتمل
+                            </button>
+                        `}
+                        
+                        <button class="btn btn-secondary" onclick="resetActivity(${activity.id})">
+                            🔄 إعادة تعيين
+                        </button>
+                    </div>
+                    
+                    <div class="notes-section">
+                        <textarea class="notes-input" placeholder="ملاحظات..." 
+                                  onchange="updateNotes(${activity.id}, this.value)">${activity.notes}</textarea>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'في الانتظار';
+                case 'active': return 'نشط';
+                case 'completed': return 'مكتمل';
+                default: return 'غير محدد';
+            }
+        }
+
+        function formatTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            if (hours > 0) {
+                return `${hours}س ${mins}د`;
+            }
+            return `${mins}د`;
+        }
+
+        function startTimer(activityId) {
+            const activity = activities.find(a => a.id === activityId);
+            if (!activity || activity.completed) return;
+
+            activity.status = 'active';
+            
+            timers[activityId] = setInterval(() => {
+                activity.timeSpent++;
+                updateTimerDisplay(activityId);
+                
+                if (activity.timeSpent >= activity.duration) {
+                    completeActivity(activityId);
+                    showNotification(`تم إكمال مهمة: ${activity.name}! 🎉`);
+                }
+                
+                updateStats();
+                saveData(); // Auto-save on timer update
+            }, 60000); // Update every minute (for demo purposes, using 60000ms)
+            
+            renderActivities();
+            updateStats();
+            saveData();
+        }
+
+        function pauseTimer(activityId) {
+            if (timers[activityId]) {
+                clearInterval(timers[activityId]);
+                delete timers[activityId];
+            }
+            
+            const activity = activities.find(a => a.id === activityId);
+            if (activity) {
+                activity.status = 'pending';
+            }
+            
+            renderActivities();
+        }
+
+        function updateTimerDisplay(activityId) {
+            const timerElement = document.getElementById(`timer-${activityId}`);
+            if (timerElement) {
+                const activity = activities.find(a => a.id === activityId);
+                const timeRemaining = Math.max(0, activity.duration - activity.timeSpent);
+                timerElement.textContent = formatTime(timeRemaining);
+            }
+        }
+
+        function completeActivity(activityId) {
+            const activity = activities.find(a => a.id === activityId);
+            if (!activity) return;
+
+            activity.completed = true;
+            activity.status = 'completed';
+            
+            if (timers[activityId]) {
+                clearInterval(timers[activityId]);
+                delete timers[activityId];
+            }
+            
+            renderActivities();
+            updateStats();
+            saveData();
+            showNotification(`تهانينا! تم إكمال مهمة: ${activity.name} 🎉`);
+        }
+
+        function resetActivity(activityId) {
+            const activity = activities.find(a => a.id === activityId);
+            if (!activity) return;
+
+            if (timers[activityId]) {
+                clearInterval(timers[activityId]);
+                delete timers[activityId];
+            }
+
+            activity.timeSpent = 0;
+            activity.completed = false;
+            activity.status = 'pending';
+            
+            renderActivities();
+            updateStats();
+            saveData();
+        }
+
+        function updateNotes(activityId, notes) {
+            const activity = activities.find(a => a.id === activityId);
+            if (activity) {
+                activity.notes = notes;
+                saveData();
+            }
+        }
+
+        function updateStats() {
+            const totalTasks = activities.length;
+            const completedTasks = activities.filter(a => a.completed).length;
+            const totalHours = activities.reduce((sum, a) => sum + a.timeSpent, 0);
+            
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('todayHours').textContent = Math.round(totalHours / 60 * 10) / 10;
+            
+            // Update last saved time
+            if (appData.lastSaved) {
+                const lastSaved = new Date(appData.lastSaved);
+                const now = new Date();
+                const diffMinutes = Math.floor((now - lastSaved) / (1000 * 60));
+                
+                let timeText;
+                if (diffMinutes < 1) {
+                    timeText = 'الآن';
+                } else if (diffMinutes < 60) {
+                    timeText = `${diffMinutes}د`;
+                } else {
+                    const hours = Math.floor(diffMinutes / 60);
+                    timeText = `${hours}س`;
+                }
+                
+                document.getElementById('lastSavedTime').textContent = timeText;
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم فقدان جميع التقدم المحرز.')) {
+                // Clear all timers
+                Object.keys(timers).forEach(id => {
+                    clearInterval(timers[id]);
+                });
+                timers = {};
+                
+                // Reset to default activities
+                activities = [...defaultActivities];
+                appData.activities = [...defaultActivities];
+                appData.lastSaved = null;
+                
+                // Clear saved data
+                try {
+                    sessionStorage.removeItem('dailyScheduleData');
+                    delete window.dailyScheduleBackup;
+                } catch (e) {
+                    console.log('Cannot clear storage');
+                }
+                
+                renderActivities();
+                updateStats();
+                showNotification('تم إعادة تعيين جميع البيانات! 🔄');
+            }
+        }
+
+        function showAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'block';
+        }
+
+        function hideAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('newTaskName').value = '';
+            document.getElementById('newTaskDuration').value = '';
+        }
+
+        function addNewTask() {
+            const name = document.getElementById('newTaskName').value;
+            const duration = parseInt(document.getElementById('newTaskDuration').value);
+            const icon = document.getElementById('newTaskIcon').value;
+            
+            if (!name || !duration) {
+                alert('الرجاء ملء جميع الحقول');
+                return;
+            }
+            
+            const newId = Math.max(...activities.map(a => a.id)) + 1;
+            const newActivity = {
+                id: newId,
+                name: name,
+                icon: icon,
+                duration: duration,
+                completed: false,
+                timeSpent: 0,
+                status: 'pending',
+                notes: ''
+            };
+            
+            activities.push(newActivity);
+            renderActivities();
+            updateStats();
+            saveData();
+            hideAddTaskModal();
+            showNotification(`تم إضافة مهمة جديدة: ${name}`);
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addTaskModal');
+            if (event.target === modal) {
+                hideAddTaskModal();
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to load saved data first
+            const dataLoaded = loadData();
+            
+            renderActivities();
+            updateStats();
+            
+            // Show welcome notification
+            setTimeout(() => {
+                if (dataLoaded) {
+                    showNotification('تم استرداد بياناتك المحفوظة! 📂');
+                } else {
+                    showNotification('مرحباً بك في منظم الوقت الذكي! 🌟');
+                }
+            }, 1000);
+        });
+
+        // Data persistence functions
+        function saveData() {
+            appData.activities = [...activities];
+            appData.lastSaved = new Date().toISOString();
+            appData.totalStats.completedToday = activities.filter(a => a.completed).length;
+            appData.totalStats.hoursToday = Math.round(activities.reduce((sum, a) => sum + a.timeSpent, 0) / 60 * 10) / 10;
+            
+            // Save to sessionStorage as fallback (works in some environments)
+            try {
+                sessionStorage.setItem('dailyScheduleData', JSON.stringify(appData));
+            } catch (e) {
+                // Fallback: use window variable for persistence within session
+                window.dailyScheduleBackup = JSON.stringify(appData);
+            }
+            
+            showNotification('تم حفظ البيانات تلقائياً 💾');
+        }
+
+        function loadData() {
+            try {
+                // Try to load from sessionStorage first
+                const savedData = sessionStorage.getItem('dailyScheduleData');
+                if (savedData) {
+                    appData = JSON.parse(savedData);
+                    activities = [...appData.activities];
+                    return true;
+                }
+            } catch (e) {
+                // Try window variable fallback
+                if (window.dailyScheduleBackup) {
+                    try {
+                        appData = JSON.parse(window.dailyScheduleBackup);
+                        activities = [...appData.activities];
+                        return true;
+                    } catch (e2) {
+                        console.log('Error loading backup data');
+                    }
+                }
+            }
+            
+            // If no saved data found, use defaults
+            appData.activities = [...defaultActivities];
+            activities = [...defaultActivities];
+            return false;
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `منظم_الوقت_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('تم تصدير البيانات بنجاح! 📤');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.activities && Array.isArray(importedData.activities)) {
+                        appData = importedData;
+                        activities = [...appData.activities];
+                        renderActivities();
+                        updateStats();
+                        saveData();
+                        showNotification('تم استيراد البيانات بنجاح! 📥');
+                    } else {
+                        throw new Error('Invalid data format');
+                    }
+                } catch (error) {
+                    showNotification('خطأ في استيراد البيانات. تأكد من صحة الملف.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Auto-save every 30 seconds and when page is about to unload
+        setInterval(() => {
+            if (activities.length > 0) {
+                saveData();
+            }
+        }, 30000);
+
+        // Save data before page unload
+        window.addEventListener('beforeunload', function(e) {
+            saveData();
+        });
+
+        // Save data when page becomes hidden (mobile/tab switching)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                saveData();
+            }
+        });
+    </script>
+</body>
+</html>
